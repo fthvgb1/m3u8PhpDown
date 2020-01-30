@@ -17,6 +17,14 @@ $prefix = dirname($url) . '/';
 
 if (!file_exists($_SERVER['SAVEDIR'] . $bag . '/' . $bag . '.m3u8')) {
     $file = file_get_contents($url);
+    //echo $file;
+    preg_match('@URI="(.*)"@', $file, $mm);
+    if (isset($mm[1])) {
+        file_put_contents($_SERVER['SAVEDIR'] . $bag . '/' . $mm[1], file_get_contents($prefix . $mm[1]));
+
+    }
+    // echo $prefix.$mm[1],PHP_EOL;exit;
+
     file_put_contents($_SERVER['SAVEDIR'] . $bag . '/' . $bag . '.m3u8', $file);
 } else {
     $file = file_get_contents($_SERVER['SAVEDIR'] . $bag . '/' . $bag . '.m3u8');
@@ -50,6 +58,7 @@ go(function () use ($produce, $consume, $threads) {
         $consume->push($produce->pop());
     }
     while (1) {
+        echo '=====================================', PHP_EOL;
         list($url, $saveName) = $consume->pop();
         echo '开始下载' . $url, PHP_EOL;
 
@@ -66,25 +75,25 @@ go(function () use ($produce, $consume, $threads) {
             ]);
             $content = curl_exec($curl);
             $info = curl_getinfo($curl);
-            print_r($info);
+            //print_r($info);
             if ($info['http_code'] == 200 && $content) {
                 $f = fopen($saveName, 'w');
                 fwrite($f, $content);
                 fclose($f);
                 echo $url, '下载完成', PHP_EOL;
-                return;
+                //return;
             } else {
                 //print_r(curl_error($curl));
                 echo $url, '下载失败,放回队列', PHP_EOL;
                 //$consume->pop();
                 $produce->push([$url, $saveName]);
             }
+            curl_close($curl);
             $consume->push($produce->pop());
         });
 
     }
     echo '消费者over', PHP_EOL;
 });
-swoole_event_wait();
 echo '下载完成';
-//todo ffmpeg
+
