@@ -89,5 +89,6 @@ go(function () use ($produce, $consume, $threads) {
 
     }
 });
-echo '下载完成';
+swoole_event_wait();
+echo '下载完成', PHP_EOL;
 
