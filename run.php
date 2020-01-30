@@ -23,7 +23,6 @@ if (!file_exists($_SERVER['SAVEDIR'] . $bag . '/' . $bag . '.m3u8')) {
         file_put_contents($_SERVER['SAVEDIR'] . $bag . '/' . $mm[1], file_get_contents($prefix . $mm[1]));
 
     }
-    // echo $prefix.$mm[1],PHP_EOL;exit;
 
     file_put_contents($_SERVER['SAVEDIR'] . $bag . '/' . $bag . '.m3u8', $file);
 } else {
@@ -50,7 +49,6 @@ go(function () use ($produce, $matches, $bag, $prefix) {
         }
         $produce->push([$url, $savename]);
     }
-    echo '生产者over', PHP_EOL;
 });
 
 go(function () use ($produce, $consume, $threads) {
@@ -65,7 +63,7 @@ go(function () use ($produce, $consume, $threads) {
         go(function () use ($url, $saveName, $produce, $consume) {
             $curl = curl_init($url);
             curl_setopt_array($curl, [
-                CURLOPT_HTTPHEADER => ['authority: q65ms8.cdnlab.live', 'accept: */*', 'accept-encoding: gzip, deflate, br', 'accept-language: zh-CN,zh;q=0.9', 'sec-fetch-mode: cors', 'sec-fetch-site: cross-site', 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36'],
+                CURLOPT_HTTPHEADER => ['accept: */*', 'accept-encoding: gzip, deflate, br', 'accept-language: zh-CN,zh;q=0.9', 'sec-fetch-mode: cors', 'sec-fetch-site: cross-site', 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36'],
                 CURLOPT_SSL_VERIFYPEER => 0, CURLOPT_SSL_VERIFYHOST => 0,
                 CURLOPT_RETURNTRANSFER => true,//CURLINFO_HEADER_OUT=>true,
                 //CURLOPT_HEADER=>true,
@@ -81,11 +79,8 @@ go(function () use ($produce, $consume, $threads) {
                 fwrite($f, $content);
                 fclose($f);
                 echo $url, '下载完成', PHP_EOL;
-                //return;
             } else {
-                //print_r(curl_error($curl));
                 echo $url, '下载失败,放回队列', PHP_EOL;
-                //$consume->pop();
                 $produce->push([$url, $saveName]);
             }
             curl_close($curl);
@@ -93,7 +88,6 @@ go(function () use ($produce, $consume, $threads) {
         });
 
     }
-    echo '消费者over', PHP_EOL;
 });
 echo '下载完成';
 
